@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finanças</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanças">
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --exp:#dc2626; --inc:#16a34a; --accent:#2563eb; --chip:#eef2f7;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0b1120; --card:#151c2c; --text:#e5e7eb; --muted:#94a3b8; --line:#253047;
+      --exp:#f87171; --inc:#4ade80; --accent:#60a5fa; --chip:#1e293b; }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  body{padding:env(safe-area-inset-top) 0 calc(72px + env(safe-area-inset-bottom))}
+  header{display:flex; align-items:center; justify-content:space-between; padding:14px 16px 6px}
+  header h1{font-size:22px; margin:0}
+  .sync{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; background:none; border:0; padding:6px}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--muted)}
+  .dot.ok{background:var(--inc)} .dot.pend{background:#f59e0b} .dot.err{background:var(--exp)}
+  main{padding:0 16px}
+  .card{background:var(--card); border-radius:16px; padding:16px; margin:10px 0; border:1px solid var(--line)}
+  .seg{display:grid; grid-template-columns:1fr 1fr; background:var(--chip); border-radius:12px; padding:4px; gap:4px}
+  .seg button{border:0; background:none; padding:10px; border-radius:9px; font-weight:600; color:var(--muted); font-size:15px}
+  .seg button.on.exp{background:var(--card); color:var(--exp); box-shadow:0 1px 3px #0002}
+  .seg button.on.inc{background:var(--card); color:var(--inc); box-shadow:0 1px 3px #0002}
+  .amount{display:flex; align-items:center; justify-content:center; gap:6px; margin:18px 0 10px}
+  .amount input{font-size:44px; font-weight:700; width:100%; max-width:260px; text-align:center; border:0;
+    background:none; color:var(--text); outline:none}
+  .amount span{font-size:32px; color:var(--muted)}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 14px}
+  .chips button{border:1px solid var(--line); background:var(--chip); color:var(--text); border-radius:999px;
+    padding:8px 12px; font-size:14px}
+  .chips button.on{background:var(--accent); border-color:var(--accent); color:#fff}
+  .row{display:flex; gap:10px}
+  input[type=text],input[type=date],input[type=url],input[type=password],textarea{
+    width:100%; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--bg);
+    color:var(--text); font-size:16px; font-family:inherit}
+  label{font-size:13px; color:var(--muted); display:block; margin:12px 0 4px}
+  .btn{width:100%; padding:14px; border:0; border-radius:12px; background:var(--accent); color:#fff;
+    font-size:17px; font-weight:600; margin-top:14px}
+  .btn.ghost{background:var(--chip); color:var(--text)}
+  .btn.danger{background:none; color:var(--exp); border:1px solid var(--line)}
+  .month{display:flex; align-items:center; justify-content:space-between; margin:6px 0}
+  .month button{border:0; background:var(--card); color:var(--text); width:40px; height:40px; border-radius:12px;
+    font-size:20px; border:1px solid var(--line)}
+  .month b{font-size:17px}
+  .month b::first-letter{text-transform:uppercase}
+  .kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px}
+  .kpi small{color:var(--muted); font-size:12px}
+  .kpi div{font-weight:700; font-size:16px; margin-top:2px; white-space:nowrap}
+  .exp{color:var(--exp)} .inc{color:var(--inc)}
+  .bar{margin:10px 0}
+  .bar .t{display:flex; justify-content:space-between; font-size:14px}
+  .bar .track{height:8px; background:var(--chip); border-radius:6px; margin-top:4px; overflow:hidden}
+  .bar .fill{height:100%; background:var(--exp); border-radius:6px}
+  .list{list-style:none; padding:0; margin:0}
+  .list li{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line)}
+  .list li:last-child{border-bottom:0}
+  .ic{width:38px; height:38px; border-radius:12px; background:var(--chip); display:grid; place-items:center; font-size:19px; flex:none}
+  .list .info{flex:1; min-width:0}
+  .list .info b{display:block; font-weight:600; font-size:15px}
+  .list .info small{color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block}
+  .list .val{font-weight:700; white-space:nowrap}
+  .day{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin:14px 0 0}
+  .empty{color:var(--muted); text-align:center; padding:24px 0}
+  nav{position:fixed; left:0; right:0; bottom:0; background:var(--card); border-top:1px solid var(--line);
+    display:grid; grid-template-columns:repeat(3,1fr); padding-bottom:env(safe-area-inset-bottom)}
+  nav button{border:0; background:none; padding:10px 0 8px; color:var(--muted); font-size:12px}
+  nav button i{display:block; font-style:normal; font-size:22px}
+  nav button.on{color:var(--accent)}
+  section[hidden]{display:none}
+  .toast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%); background:var(--text); color:var(--bg);
+    padding:10px 16px; border-radius:999px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none}
+  .toast.show{opacity:1}
+  dialog{border:0; border-radius:16px; background:var(--card); color:var(--text); width:min(92vw,420px); padding:18px}
+  dialog::backdrop{background:#0008}
+  .hint{font-size:13px; color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Novo registo</h1>
+  <button class="sync" id="syncBtn" aria-label="Sincronizar"><span class="dot" id="syncDot"></span><span id="syncTxt">Local</span></button>
+</header>
+
+<main>
+  <!-- REGISTAR -->
+  <section id="v-add">
+    <div class="card">
+      <div class="seg">
+        <button id="tExp" class="exp on">Despesa</button>
+        <button id="tInc" class="inc">Receita</button>
+      </div>
+      <div class="amount">
+        <input id="amount" inputmode="decimal" placeholder="0,00" autocomplete="off">
+        <span>€</span>
+      </div>
+      <div class="chips" id="cats"></div>
+      <div class="row">
+        <div style="flex:1"><label for="date">Data</label><input type="date" id="date"></div>
+      </div>
+      <label for="note">Nota (opcional)</label>
+      <input type="text" id="note" placeholder="Ex.: Continente, jantar com amigos…" autocomplete="off">
+      <button class="btn" id="save">Guardar</button>
+    </div>
+  </section>
+
+  <!-- RESUMO -->
+  <section id="v-sum" hidden>
+    <div class="month">
+      <button id="prev" aria-label="Mês anterior">‹</button>
+      <b id="monthLbl"></b>
+      <button id="next" aria-label="Mês seguinte">›</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><small>Receitas</small><div class="inc" id="kInc"></div></div>
+      <div class="kpi"><small>Despesas</small><div class="exp" id="kExp"></div></div>
+      <div class="kpi"><small>Saldo</small><div id="kBal"></div></div>
+    </div>
+    <div class="card">
+      <b>Despesas por categoria</b>
+      <div id="bars"></div>
+    </div>
+    <div class="card">
+      <b>Movimentos</b>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <!-- DEFINIÇÕES -->
+  <section id="v-set" hidden>
+    <div class="card">
+      <b>Sincronização com Google Sheets</b>
+      <p class="hint">Cola aqui o URL da Web App do Apps Script e o código secreto que definiste no script.</p>
+      <label for="sUrl">URL da Web App</label>
+      <input type="url" id="sUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+      <label for="sTok">Código secreto</label>
+      <input type="password" id="sTok" autocomplete="off">
+      <button class="btn" id="sSave">Guardar e sincronizar</button>
+      <button class="btn ghost" id="sPull">Recarregar tudo do Sheet</button>
+    </div>
+    <div class="card">
+      <b>Categorias</b>
+      <p class="hint">Separadas por vírgulas. Podes pôr um emoji no início.</p>
+      <label for="cExp">Despesas</label>
+      <textarea id="cExp" rows="3"></textarea>
+      <label for="cInc">Receitas</label>
+      <textarea id="cInc" rows="2"></textarea>
+      <button class="btn ghost" id="cSave">Guardar categorias</button>
+    </div>
+    <div class="card">
+      <b>Backup</b>
+      <button class="btn ghost" id="exp">Exportar CSV</button>
+      <p class="hint" id="stats"></p>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-v="add" class="on"><i>＋</i>Registar</button>
+  <button data-v="sum"><i>📊</i>Resumo</button>
+  <button data-v="set"><i>⚙️</i>Definições</button>
+</nav>
+
+<dialog id="dlg">
+  <b id="dTitle"></b>
+  <p class="hint" id="dInfo"></p>
+  <button class="btn danger" id="dDel">Apagar registo</button>
+  <button class="btn ghost" id="dClose">Fechar</button>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const KEY = { recs:'fin.records', cfg:'fin.config', cats:'fin.cats' };
+
+  const DEFAULT_CATS = {
+    exp: ['🏠 Casa','🛒 Supermercado','🍽️ Restaurantes','🚗 Transporte','⛽ Combustível','💊 Saúde','🎉 Lazer','🔁 Subscrições','🛍️ Compras','✈️ Viagens','🎁 Presentes','📦 Outros'],
+    inc: ['💼 Salário','➕ Extra','↩️ Reembolso','📈 Investimentos','📦 Outros']
+  };
+
+  // ---------- armazenamento local ----------
+  const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+  const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+  let records = load(KEY.recs, []);   // {id,date,type,category,amount,note,createdAt,updatedAt,deleted,synced}
+  let cfg = load(KEY.cfg, { url:'', token:'', lastSync:null });
+  let cats = load(KEY.cats, DEFAULT_CATS);
+  const saveRecs = () => store(KEY.recs, records);
+
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+  const eur = n => n.toLocaleString('pt-PT', { style:'currency', currency:'EUR' });
+  const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800); };
+  const emoji = c => { const m = c.match(/^(\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*)\s*/u); return m ? m[1] : '•'; };
+  const label = c => c.replace(/^(\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*)\s*/u, '');
+
+  // ---------- navegação ----------
+  const titles = { add:'Novo registo', sum:'Resumo', set:'Definições' };
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+  function show(v){
+    document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    ['add','sum','set'].forEach(s => $('v-'+s).hidden = s !== v);
+    $('title').textContent = titles[v];
+    if (v === 'sum') renderSummary();
+    if (v === 'set') renderSettings();
+  }
+
+  // ---------- registar ----------
+  let type = 'exp', cat = null;
+  $('tExp').onclick = () => setType('exp');
+  $('tInc').onclick = () => setType('inc');
+  function setType(t){
+    type = t; cat = null;
+    $('tExp').classList.toggle('on', t === 'exp');
+    $('tInc').classList.toggle('on', t === 'inc');
+    renderCats();
+  }
+  function renderCats(){
+    const box = $('cats'); box.innerHTML = '';
+    cats[type].forEach(c => {
+      const b = document.createElement('button');
+      b.textContent = c; b.classList.toggle('on', c === cat);
+      b.onclick = () => { cat = c; renderCats(); };
+      box.appendChild(b);
+    });
+  }
+  $('date').value = today();
+
+  $('save').onclick = () => {
+    const amount = parseFloat(($('amount').value || '').replace(/\s/g,'').replace(',', '.'));
+    if (!amount || amount <= 0) return toast('Indica um valor');
+    if (!cat) return toast('Escolhe uma categoria');
+    const now = new Date().toISOString();
+    records.push({ id:uid(), date:$('date').value || today(), type, category:cat, amount:Math.round(amount*100)/100,
+      note:$('note').value.trim(), createdAt:now, updatedAt:now, deleted:false, synced:false });
+    saveRecs();
+    $('amount').value = ''; $('note').value = ''; cat = null; renderCats();
+    toast((type === 'exp' ? 'Despesa' : 'Receita') + ' guardada');
+    sync();
+  };
+
+  // ---------- resumo ----------
+  let viewMonth = today().slice(0,7);
+  $('prev').onclick = () => shiftMonth(-1);
+  $('next').onclick = () => shiftMonth(1);
+  function shiftMonth(n){
+    const [y,m] = viewMonth.split('-').map(Number);
+    const d = new Date(y, m - 1 + n, 1);
+    viewMonth = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    renderSummary();
+  }
+  function renderSummary(){
+    const [y,m] = viewMonth.split('-').map(Number);
+    $('monthLbl').textContent = new Date(y, m-1, 1).toLocaleDateString('pt-PT', { month:'long', year:'numeric' });
+    const rows = records.filter(r => !r.deleted && r.date.startsWith(viewMonth))
+      .sort((a,b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+    const inc = rows.filter(r => r.type === 'inc').reduce((s,r) => s + r.amount, 0);
+    const exp = rows.filter(r => r.type === 'exp').reduce((s,r) => s + r.amount, 0);
+    $('kInc').textContent = eur(inc); $('kExp').textContent = eur(exp);
+    $('kBal').textContent = eur(inc - exp); $('kBal').className = inc - exp >= 0 ? 'inc' : 'exp';
+
+    const byCat = {};
+    rows.filter(r => r.type === 'exp').forEach(r => byCat[r.category] = (byCat[r.category] || 0) + r.amount);
+    const sorted = Object.entries(byCat).sort((a,b) => b[1] - a[1]);
+    const max = sorted.length ? sorted[0][1] : 1;
+    $('bars').innerHTML = sorted.length ? sorted.map(([c,v]) =>
+      `<div class="bar"><div class="t"><span>${esc(c)}</span><span>${eur(v)} · ${Math.round(v/exp*100)}%</span></div>
+       <div class="track"><div class="fill" style="width:${v/max*100}%"></div></div></div>`).join('')
+      : '<p class="empty">Sem despesas neste mês</p>';
+
+    if (!rows.length){ $('list').innerHTML = '<p class="empty">Sem movimentos</p>'; return; }
+    let html = '', lastDay = '';
+    rows.forEach(r => {
+      if (r.date !== lastDay){
+        if (lastDay) html += '</ul>';
+        lastDay = r.date;
+        const d = new Date(r.date + 'T12:00:00');
+        html += `<p class="day">${d.toLocaleDateString('pt-PT', { weekday:'short', day:'numeric', month:'short' })}</p><ul class="list">`;
+      }
+      html += `<li data-id="${r.id}"><div class="ic">${emoji(r.category)}</div>
+        <div class="info"><b>${esc(label(r.category))}</b><small>${esc(r.note || '')}${r.synced ? '' : ' ⏳'}</small></div>
+        <div class="val ${r.type}">${r.type === 'exp' ? '−' : '+'}${eur(r.amount)}</div></li>`;
+    });
+    $('list').innerHTML = html + '</ul>';
+    $('list').querySelectorAll('li').forEach(li => li.onclick = () => openRec(li.dataset.id));
+  }
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  let current = null;
+  function openRec(id){
+    current = records.find(r => r.id === id); if (!current) return;
+    $('dTitle').textContent = `${current.category} · ${eur(current.amount)}`;
+    $('dInfo').textContent = `${current.date}${current.note ? ' · ' + current.note : ''}${current.synced ? '' : ' · por sincronizar'}`;
+    $('dlg').showModal();
+  }
+  $('dClose').onclick = () => $('dlg').close();
+  $('dDel').onclick = () => {
+    if (!current) return;
+    current.deleted = true; current.updatedAt = new Date().toISOString(); current.synced = false;
+    saveRecs(); $('dlg').close(); renderSummary(); toast('Registo apagado'); sync();
+  };
+
+  // ---------- definições ----------
+  function renderSettings(){
+    $('sUrl').value = cfg.url; $('sTok').value = cfg.token;
+    $('cExp').value = cats.exp.join(', '); $('cInc').value = cats.inc.join(', ');
+    const live = records.filter(r => !r.deleted).length, pend = records.filter(r => !r.synced).length;
+    $('stats').textContent = `${live} registos no telemóvel · ${pend} por sincronizar` +
+      (cfg.lastSync ? ` · última sincronização ${new Date(cfg.lastSync).toLocaleString('pt-PT')}` : '');
+  }
+  $('sSave').onclick = async () => {
+    cfg.url = $('sUrl').value.trim(); cfg.token = $('sTok').value.trim(); store(KEY.cfg, cfg);
+    await sync(true); await pull(); renderSettings();
+  };
+  $('sPull').onclick = async () => { await pull(true); renderSettings(); };
+  $('cSave').onclick = () => {
+    const parse = s => s.split(',').map(x => x.trim()).filter(Boolean);
+    const e = parse($('cExp').value), i = parse($('cInc').value);
+    if (!e.length || !i.length) return toast('Precisas de pelo menos uma categoria');
+    cats = { exp:e, inc:i }; store(KEY.cats, cats); renderCats(); toast('Categorias guardadas');
+  };
+  $('exp').onclick = () => {
+    const head = ['data','tipo','categoria','valor','nota'];
+    const rows = records.filter(r => !r.deleted).sort((a,b) => a.date.localeCompare(b.date))
+      .map(r => [r.date, r.type === 'exp' ? 'Despesa' : 'Receita', label(r.category), String(r.amount).replace('.', ','), r.note]);
+    const csv = '﻿' + [head, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+    a.download = `financas_${today()}.csv`; a.click();
+  };
+
+  // ---------- sincronização ----------
+  let syncing = false;
+  function setStatus(){
+    const pend = records.filter(r => !r.synced).length;
+    const dot = $('syncDot'), txt = $('syncTxt');
+    dot.className = 'dot';
+    if (!cfg.url){ txt.textContent = 'Só local'; return; }
+    if (syncing){ dot.classList.add('pend'); txt.textContent = 'A sincronizar…'; return; }
+    if (setStatus.err){ dot.classList.add('err'); txt.textContent = pend ? `${pend} pendentes` : 'Erro'; return; }
+    if (pend){ dot.classList.add('pend'); txt.textContent = `${pend} pendentes`; return; }
+    dot.classList.add('ok'); txt.textContent = 'Sincronizado';
+  }
+  const strip = r => ({ id:r.id, date:r.date, type:r.type, category:r.category, amount:r.amount, note:r.note,
+    createdAt:r.createdAt, updatedAt:r.updatedAt, deleted:r.deleted });
+
+  async function sync(verbose){
+    setStatus();
+    if (!cfg.url || !cfg.token || syncing || !navigator.onLine) return;
+    const pending = records.filter(r => !r.synced);
+    if (!pending.length){ if (verbose) toast('Tudo sincronizado'); return; }
+    syncing = true; setStatus();
+    try {
+      const res = await fetch(cfg.url, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token:cfg.token, action:'upsert', records:pending.map(strip) }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Erro');
+      const sent = new Map(pending.map(r => [r.id, r.updatedAt]));
+      records.forEach(r => { if (sent.get(r.id) === r.updatedAt) r.synced = true; });
+      saveRecs(); cfg.lastSync = new Date().toISOString(); store(KEY.cfg, cfg);
+      setStatus.err = false;
+      if (verbose) toast(`${pending.length} registos enviados`);
+    } catch (e) {
+      setStatus.err = true;
+      if (verbose) toast('Falhou: ' + e.message);
+    } finally { syncing = false; setStatus(); }
+  }
+
+  async function pull(verbose){
+    if (!cfg.url || !cfg.token || !navigator.onLine) return;
+    try {
+      const res = await fetch(cfg.url, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token:cfg.token, action:'list' }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Erro');
+      const byId = new Map(records.map(r => [r.id, r]));
+      let n = 0;
+      data.records.forEach(s => {
+        const l = byId.get(s.id);
+        if (!l || (l.synced && s.updatedAt > l.updatedAt)){
+          const rec = { ...s, amount:Number(s.amount), deleted:s.deleted === true || s.deleted === 'TRUE', synced:true };
+          if (l) Object.assign(l, rec); else records.push(rec);
+          n++;
+        }
+      });
+      saveRecs(); setStatus.err = false; setStatus();
+      if (verbose) toast(n ? `${n} registos atualizados` : 'Já estava tudo atualizado');
+    } catch (e) {
+      setStatus.err = true; setStatus();
+      if (verbose) toast('Falhou: ' + e.message);
+    }
+  }
+
+  $('syncBtn').onclick = async () => { await sync(true); await pull(); };
+  window.addEventListener('online', () => sync());
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { sync(); } });
+
+  // ---------- arranque ----------
+  renderCats(); setStatus();
+  sync().then(() => pull());
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
